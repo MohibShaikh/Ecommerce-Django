@@ -1,11 +1,11 @@
 {% extends 'shop/base.html' %} 
 
  {% block title %} ContactUs - Awesome Cart {% endblock %}
- {% block body %} This is body 
+ {% block body %} 
  
  <div class="container">
      <h3>Contact Us</h3>
-     <form action="/contact/" method="post">
+     <form action="/Shop/contact/" method="post">
         {% csrf_token %}
   <div class="form-group">
     <label for="name">Name</label>
@@ -25,8 +25,15 @@
     <textarea class="form-control" id="desc" name="desc" rows="3"></textarea>
   </div>
   <button type="submit" class="btn btn-success">Submit</button>
- 
- 
- 
+
  
  {% endblock %}
+
+ {%block js%}
+ <script>
+ {% if thank %}
+alert('Thanks for contacting with us! . We will respond your query as soon as possible');
+document.location='/Shop/contact/'
+{% endif %}
+</script>
+{% endblock %}
