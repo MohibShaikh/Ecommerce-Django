@@ -17,7 +17,7 @@ BuyEverything is a modern, professional ecommerce web application built with Dja
 
 1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/MohibShaikh/Ecommerce-Django.git
    cd Ecommerce-Django
    ```
 2. **Create and activate a virtual environment:**
