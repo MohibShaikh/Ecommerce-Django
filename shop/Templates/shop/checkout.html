@@ -2,83 +2,269 @@
 {% block title %} Checkout - BuyEverything {% endblock %}
 {% block body %}
 <div class="container">
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
+
+    {% if thank %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Thanks for ordering with us. Your order id is {{id}}. Use it to track your order using our order tracker.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
+
     <div class="col my-4">
-        <h2>Step 1 - BuyEverything Express Checkout - Review Your Cart Items</h2>
+        <h2>Step 1 - Review Your Cart</h2>
         <div class="my-4">
             <ul class="list-group" id="items">
             </ul>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mt-3">
-                    <li class="breadcrumb-item active" aria-current="page">Your Cart Total Is <b>Rs.<span id="totalPrice"></b>  </span>Enter your details below & place your order. Thanks for using BuyEverything!</li>
+                    <li class="breadcrumb-item active" aria-current="page">Your Cart Total Is <b>₨<span id="totalPrice"></b></span></li>
                 </ol>
             </nav>
         </div>
+    </div>
+
     <div class="col my-4">
-        <h2>Step 2 - Enter Address & Other Details:</h2>
-        <form method="post" action="/shop/checkout/">{% csrf_token %}
+        <h2>Step 2 - Payment Details</h2>
+        <form id="payment-form" method="post" action="/shop/checkout/" class="needs-validation" novalidate>
+            {% csrf_token %}
             <input type="hidden" name="itemsJson" id="itemsJson">
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="inputname">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="mb-3">Personal Information</h4>
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="John Doe" required>
+                        <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="john.doe@example.com" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="555-0123" required>
+                        <div class="invalid-feedback">Please enter your phone number.</div>
+                    </div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="inputEmail4">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                
+                <div class="col-md-6">
+                    <h4 class="mb-3">Shipping Address</h4>
+                    <div class="form-group">
+                        <label for="address1">Address</label>
+                        <input type="text" class="form-control" id="address1" name="address1" value="123 Main Street" required>
+                        <div class="invalid-feedback">Please enter your address.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address2">Address line 2</label>
+                        <input type="text" class="form-control" id="address2" name="address2" value="Apt 4B">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" id="city" name="city" value="New York" required>
+                            <div class="invalid-feedback">Please enter your city.</div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="state">State</label>
+                            <input type="text" class="form-control" id="state" name="state" value="NY" required>
+                            <div class="invalid-feedback">Please enter your state.</div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="zip_code">ZIP</label>
+                            <input type="text" class="form-control" id="zip_code" name="zip_code" value="10001" required>
+                            <div class="invalid-feedback">Please enter your ZIP code.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">Payment</h4>
             <div class="form-group">
-                <label for="inputAddress">Address</label>
-                <input type="text" class="form-control" id="address1" name="address1" placeholder="1234 Main St">
-            </div>
-            <div class="form-group">
-                <label for="inputAddress2">Address line 2</label>
-                <input type="text" class="form-control" id="address2" name="address2" placeholder="Apartment, studio, or floor">
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="inputCity">City</label>
-                    <input type="text" class="form-control" id="city" name="city">
+                <label for="card-element">Credit or Debit Card</label>
+                <div id="card-element" class="form-control">
+                    <!-- Stripe Element will be inserted here -->
                 </div>
-                <div class="form-group col-md-4">
-                    <label for="inputState">State</label>
-                    <input type="text" class="form-control" id="state" name="state"  placeholder="Enter State">
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="inputZip">Zip</label>
-                    <input type="text" class="form-control" id="zip_code" name="zip_code">
+                <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                <div class="alert alert-info mt-3">
+                    <h5>Test Card Information:</h5>
+                    <p class="mb-1">Card Number: 4242 4242 4242 4242</p>
+                    <p class="mb-1">Expiry Date: Any future date (e.g., 12/25)</p>
+                    <p class="mb-1">CVC: Any 3 digits (e.g., 123)</p>
+                    <p class="mb-0">ZIP: 10001</p>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="inputZip">Phone Number</label>
-                <input type="tel" class="form-control" id="phone" name="phone">
-            </div>
-            <button type="submit" class="btn btn-primary">Place Order</button>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" id="submit-button">
+                <span id="button-text">Pay Now</span>
+                <span id="spinner" class="spinner hidden"></span>
+            </button>
         </form>
     </div>
 </div>
 {% endblock %}
+
 {% block js %}
+<script src="https://js.stripe.com/v3/"></script>
 <script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Initialize Stripe
+const stripe = Stripe('{{ stripe_public_key }}');
+const elements = stripe.elements();
+
+// Create card Element with custom styling
+const card = elements.create('card', {
+    style: {
+        base: {
+            fontSize: '16px',
+            color: '#32325d',
+            fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+            fontSmoothing: 'antialiased',
+            '::placeholder': {
+                color: '#aab7c4'
+            }
+        },
+        invalid: {
+            color: '#fa755a',
+            iconColor: '#fa755a'
+        }
+    },
+    value: {
+        number: '4242424242424242',
+        exp_month: 12,
+        exp_year: 2025,
+        cvc: '123'
+    }
+});
+
+card.mount('#card-element');
+
+// Handle real-time validation errors from the card Element
+card.addEventListener('change', function(event) {
+    const displayError = document.getElementById('card-errors');
+    if (event.error) {
+        displayError.textContent = event.error.message;
+    } else {
+        displayError.textContent = '';
+    }
+});
+
+// Handle form submission
+const form = document.getElementById('payment-form');
+const submitButton = document.getElementById('submit-button');
+const spinner = document.getElementById('spinner');
+const buttonText = document.getElementById('button-text');
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    submitButton.disabled = true;
+    spinner.classList.remove('hidden');
+    buttonText.textContent = 'Processing...';
+
+    try {
+        const {paymentMethod, error} = await stripe.createPaymentMethod({
+            type: 'card',
+            card: card,
+            billing_details: {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                address: {
+                    line1: document.getElementById('address1').value,
+                    line2: document.getElementById('address2').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    postal_code: document.getElementById('zip_code').value,
+                },
+                phone: document.getElementById('phone').value,
+            },
+        });
+
+        if (error) {
+            const errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message;
+            submitButton.disabled = false;
+            spinner.classList.add('hidden');
+            buttonText.textContent = 'Pay Now';
+        } else {
+            // Add payment method ID to form
+            const hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'payment_method_id');
+            hiddenInput.setAttribute('value', paymentMethod.id);
+            form.appendChild(hiddenInput);
+
+            // Submit the form
+            form.submit();
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        const errorElement = document.getElementById('card-errors');
+        errorElement.textContent = 'An unexpected error occurred.';
+        submitButton.disabled = false;
+        spinner.classList.add('hidden');
+        buttonText.textContent = 'Pay Now';
+    }
+});
+
+// Cart handling
 if (localStorage.getItem('cart') == null) {
     var cart = {};
 } else {
     cart = JSON.parse(localStorage.getItem('cart'));
 }
-console.log(cart);
+
 var sum = 0;
-var totalPrice=0;
+var totalPrice = 0;
 if ($.isEmptyObject(cart)) {
-    //if object is empty
     mystr = `<p>Your cart is empty, please add some items to your cart before checking out!</p>`
     $('#items').append(mystr);
 } else {
     for (item in cart) {
         let name = cart[item][1];
         let qty = cart[item][0];
-        let price=cart[item][2];
+        let price = cart[item][2];
         sum = sum + qty;
-        totalPrice=totalPrice + qty*price
+        totalPrice = totalPrice + qty * price;
         mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
                     ${name}
                     <span class="badge badge-primary badge-pill">${qty}</span>
@@ -86,14 +272,67 @@ if ($.isEmptyObject(cart)) {
         $('#items').append(mystr);
     }
 }
+
 document.getElementById('cart').innerHTML = sum;
 document.getElementById('totalPrice').innerHTML = totalPrice;
-
 $('#itemsJson').val(JSON.stringify(cart));
-{% if thank %}
-alert('Thanks for ordering with us. Your order is is {{id}}. Use it to track your order using our order tracker');
-localStorage.clear();
-document.location = "/shop";
-{% endif %}
 </script>
+
+<style>
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none;
+}
+
+#card-element {
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: white;
+    min-height: 40px;
+}
+
+#card-errors {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.alert-info {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #495057;
+}
+
+.alert-info h5 {
+    color: #0c5460;
+    margin-bottom: 0.5rem;
+}
+
+.alert-info p {
+    margin-bottom: 0.25rem;
+}
+</style>
 {% endblock %}
