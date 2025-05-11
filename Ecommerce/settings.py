@@ -22,17 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-o&5!0@-k+8a_)nqse$=6)5g0adn^5gx=^!n0*=$#o1+_7fe8d8'
 
-# SECURITY WARNING: don't run with Page not found (404)
-Request Method:	GET
-Request URL:	http://127.0.0.1:8000/Shop
-Using the URLconf defined in Ecommerce.urls, Django tried these URL patterns, in this order:
-
-admin/
-[name='Home']
-blog/
-Shop/
-^media/(?P<path>.*)$
-The current path, Shop, didn’t match any of these.g turned on in production!
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
